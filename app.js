@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var hello = require('./routes/hello');
+var mongoose = require('mongoose');
 
 var app = express();
 
@@ -22,6 +23,33 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(function(req, res, next){
+  mongoose.connect('mongodb://test:123456@ds151242.mlab.com:51242/vcard');
+  var db = mongoose.connection;
+
+  var userSchema = mongoose.Schema({
+      Name: String,
+      Phone: String,
+      Email: String,
+      Address: String,
+      Age: Number
+  });
+
+  db.once('open', function callback () {
+    console.log('MongoDB: connected.');
+
+    app.db = {
+      model: {
+        User: mongoose.model('User', userSchema)
+      }
+    };
+
+    next();
+  });
+
+});
+
 
 app.use('/', routes);
 app.use('/users', users);

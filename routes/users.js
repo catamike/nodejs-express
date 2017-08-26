@@ -4,7 +4,19 @@ var router = express.Router();
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+  var db = req.app.db.model.User;
+});
+
+router.get('/:id', function(req, res, next) {
+  var db = req.app.db.model.User;
+});
+
+router.put('/:id', function(req, res, next) {
+  var db = req.app.db.model.User;
+});
+
+router.delete('/:id', function(req, res, next) {
+  var db = req.app.db.model.User;
 });
 
 module.exports = router;
