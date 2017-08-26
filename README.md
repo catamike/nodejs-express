@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/catamike/nodejs-express.svg?branch=master)](https://travis-ci.org/catamike/nodejs-express)
+![](https://travis-ci.org/catamike/nodejs-express.svg?branch=master)
 
 https://travis-ci.org/catamike/nodejs-express.svg?branch=master
 ## Node.js 雲端技術與軟體思惟
