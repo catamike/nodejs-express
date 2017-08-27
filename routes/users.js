@@ -1,44 +1,49 @@
-'use strict';
 var express = require('express');
 var router = express.Router();
-var passport = require('passport');
 
-/* GET users listing. */
-router.get('/',
-	passport.authenticate('facebook', { failureRedirect: '/login/fail' }),
-	function(req, res, next) {
-		next();
-  	}
-  );
-
+/**
+ * GET /users
+ */
 router.get('/', function(req, res, next) {
   var db = req.app.db.model.User;
-  db.find({}, function(err, users){
+
+  db.find({}, function(err, users) {
   	res.json(users);
   });
 });
 
+/**
+ * GET /users/:id
+ */
 router.get('/:id', function(req, res, next) {
   var db = req.app.db.model.User;
+
+  // See: http://expressjs.com/en/guide/routing.html
   var id = req.params.id;
 
-  db.find({_id: id}, function(err, user){
+  db.find({_id: id}, function(err, user) {
   	res.json(user);
-  });
+  });  
 });
 
+/**
+ * PUT /users/:id
+ */
 router.put('/:id', function(req, res, next) {
   var db = req.app.db.model.User;
   var id = req.params.id;
-  var phone = req.body.phone;//body parser 符合json格式
+  var phone = req.body.phone;
 
   db
-  .update({_id: id}, { $set: {Phone: phone} } )
-  .exec(function(err, nModified){
-  	res.send({status: "ok"});
+  .update({_id: id}, { $set: {Phone: phone} })
+  .exec(function(err, nModified) {
+    res.send({ status: "ok" });
   });
 });
 
+/**
+ * DELETE /users/:id
+ */
 router.delete('/:id', function(req, res, next) {
   var db = req.app.db.model.User;
   var id = req.params.id;

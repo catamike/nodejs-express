@@ -4,13 +4,17 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+
+var passport = require('passport')
+  , FacebookStrategy = require('passport-facebook').Strategy;
+
+var FACEBOOK_APP_ID = '103017060410392';
+var FACEBOOK_APP_SECRET = 'e38de1b6cfa8fc433df6a005277bf1eb';
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var hello = require('./routes/hello');
-var mongoose = require('mongoose');
-
-var passport = require('passport');
 
 var app = express();
 
@@ -26,16 +30,33 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(require('serve-static')(__dirname + '/../../public'));
-app.use(require('cookie-parser')());
-app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+//
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(function(req, res, next){
-  if(typeof app.db !== 'undefined')
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+passport.use(new FacebookStrategy({
+    clientID: FACEBOOK_APP_ID,
+    clientSecret: FACEBOOK_APP_SECRET,
+    callbackURL: "/"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    return done(null, profile);
+  }
+)); 
+
+// connect to MongoDB server and provide the collection schema
+app.use(function(req, res, next) {
+  if (typeof app.db !== 'undefined')
     next();
+
   mongoose.connect('mongodb://test:123456@ds151242.mlab.com:51242/vcard');
   var db = mongoose.connection;
 
@@ -58,14 +79,21 @@ app.use(function(req, res, next){
 
     next();
   });
-
 });
 
-// passport midleware OATH
-
 app.use('/', routes);
+app.get('/login',
+  passport.authenticate('facebook', { failureRedirect: '/login/fail' }),
+  function(req, res, next) {
+    res.redirect('/');
+});
+app.use('/users', function(req, res, next) {
+  if (req.isAuthenticated())
+    next();
+  res.redirect('/login');
+});
 app.use('/users', users);
-app.use('/hello', hello);
+app.use('/jollen', hello);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
