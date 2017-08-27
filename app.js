@@ -10,6 +10,8 @@ var users = require('./routes/users');
 var hello = require('./routes/hello');
 var mongoose = require('mongoose');
 
+var passport = require('passport');
+
 var app = express();
 
 // view engine setup
@@ -24,7 +26,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(require('serve-static')(__dirname + '/../../public'));
+app.use(require('cookie-parser')());
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(function(req, res, next){
+  if(typeof app.db !== 'undefined')
+    next();
   mongoose.connect('mongodb://test:123456@ds151242.mlab.com:51242/vcard');
   var db = mongoose.connection;
 
@@ -50,6 +61,7 @@ app.use(function(req, res, next){
 
 });
 
+// passport midleware OATH
 
 app.use('/', routes);
 app.use('/users', users);
